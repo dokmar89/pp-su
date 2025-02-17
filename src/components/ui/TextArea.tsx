@@ -2,7 +2,7 @@
 import React from 'react';
 
 export type TextAreaProps = {
-  label: string;
+  label?: string; // Label je optional, protože ho třeba v IDScanStep nepoužíváš
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
@@ -23,26 +23,38 @@ const TextArea: React.FC<TextAreaProps> = ({
   rows = 4,
 }) => {
   return (
-    <div style={{ marginBottom: '1rem' }}>
-      <label>
-        {label} {required && '*'}
-      </label>
+    <div className="mb-4"> {/* Použij mb-4 pro spacing */}
+      {label && (
+        <label className="block text-sm font-medium text-gray-700">
+          {label} {required && <span className="text-red-500">*</span>}
+        </label>
+      )}
       <textarea
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
+        className={`
+          block
+          w-full
+          px-3
+          py-2
+          text-base
+          font-normal
+          text-gray-700
+          bg-white bg-clip-padding
+          border border-solid border-gray-300
+          rounded
+          transition
+          ease-in-out
+          m-0
+          focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none
+          ${error ? 'border-red-500' : ''}
+        `}
         aria-invalid={error}
-        style={{
-          display: 'block',
-          width: '100%',
-          padding: '8px',
-          border: error ? '1px solid red' : '1px solid #ccc',
-          borderRadius: '4px',
-        }}
       />
       {error && errorMessage && (
-        <span style={{ color: 'red', fontSize: '0.8rem' }}>{errorMessage}</span>
+        <span className="text-red-500 text-xs">{errorMessage}</span>
       )}
     </div>
   );

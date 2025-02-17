@@ -6,7 +6,7 @@ import PasswordInput from './ui/PasswordInput';
 import Checkbox from './ui/Checkbox';
 import Button from './ui/Button';
 import Notification from './ui/Notification';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 
 const LoginForm: React.FC = () => {

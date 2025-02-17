@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+// src/components/AddEshopForm.tsx
+'use client';
+
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import TextInput from './ui/TextInput';
 import UrlInput from './ui/UrlInput';
@@ -10,108 +13,93 @@ import Button from './ui/Button';
 import Notification from './ui/Notification';
 import Loading from './ui/Loading';
 import ReadOnlyDisplay from './ui/ReadOnlyDisplay';
+import { useForm } from 'react-hook-form'; // Importuj useForm
+import { supabase } from '../lib/supabase';
+import { useState } from 'react';
+
+interface Option {
+  value: string;
+  label: string;
+}
 
 const AddEshopForm: React.FC = () => {
   const router = useRouter();
-  const [eshopName, setEshopName] = useState('');
-  const [websiteUrl, setWebsiteUrl] = useState('');
-  const [sectors, setSectors] = useState<string[]>([]);
-  const [verificationMethods, setVerificationMethods] = useState<string[]>([]);
-  const [integration, setIntegration] = useState('');
-  const [pricePlan, setPricePlan] = useState('');
-  const [confirmation, setConfirmation] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [apiKey, setApiKey] = useState<string | null>(null);
 
+  // Použij useForm
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }, // Získej chyby a stav odesílání
+  } = useForm();
+
   // Možné možnosti – placeholder hodnoty
-  const sectorOptions = [
+  const sectorOptions: Option[] = [
     { value: 'fashion', label: 'Móda' },
     { value: 'electronics', label: 'Elektronika' },
     { value: 'home', label: 'Domácnost' },
   ];
 
-  const verificationMethodOptions = [
+  const verificationMethodOptions: Option[] = [
     { value: 'bankid', label: 'BankID' },
     { value: 'mojeid', label: 'mojeID' },
     { value: 'ocr', label: 'OCR' },
     { value: 'facescan', label: 'Facescan' },
   ];
 
-  const integrationOptions = [
+  const integrationOptions: Option[] = [
     { value: 'api', label: 'API' },
     { value: 'widget', label: 'Widget' },
     { value: 'plugin', label: 'Plugin' },
   ];
 
-  const pricePlanOptions = [
+  const pricePlanOptions: Option[] = [
     { value: 'se smlouvou', label: 'Se smlouvou' },
     { value: 'bez smlouvy', label: 'Bez smlouvy' },
   ];
 
-  // Základní validace URL
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validace povinných polí
-    if (!eshopName || !websiteUrl || sectors.length === 0 || verificationMethods.length === 0 || !integration || !pricePlan || !confirmation) {
-      setNotification({ type: 'error', message: 'Vyplňte prosím všechna povinná pole.' });
-      return;
-    }
-    if (!isValidUrl(websiteUrl)) {
-      setNotification({ type: 'error', message: 'Zadejte platnou URL.' });
-      return;
-    }
-
+  const onSubmit = async (data: any) => {
     setLoading(true);
     setNotification(null);
 
     // Příprava datového payloadu
     const payload = {
-      shop_name: eshopName,
-      website_url: websiteUrl,
-      sector: sectors,
-      verification_methods: verificationMethods,
-      integration_type: integration,
-      price_plan: pricePlan,
+      shop_name: data.eshopName,
+      website_url: data.websiteUrl,
+      sector: data.sectors,
+      verification_methods: data.verificationMethods,
+      integration_type: data.integration,
+      price_plan: data.pricePlan,
     };
-
     try {
       const response = await fetch('/api/create-eshop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await response.json();
+      const responseData = await response.json();
       if (!response.ok) {
-        setNotification({ type: 'error', message: data.error || 'Při přidávání eshopu došlo k chybě.' });
+        setNotification({ type: 'error', message: responseData.error || 'Při přidávání eshopu došlo k chybě.' });
       } else {
-        // Předpokládáme, že odpověď obsahuje id nového eshopu a vygenerovaný API klíč
-        setApiKey(data.api_key);
+        setApiKey(responseData.api_key);
         setNotification({ type: 'success', message: 'Eshop byl úspěšně přidán.' });
-        // Po krátké prodlevě přesměrujeme uživatele na stránku přizpůsobení eshopu
         setTimeout(() => {
-          router.push(`/eshop/${data.id}/customize`);
+          router.push(`/eshop/${responseData.id}/customize`);
         }, 2000);
       }
     } catch (error: any) {
       setNotification({ type: 'error', message: error.message || 'Při přidávání eshopu došlo k chybě.' });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
+
   return (
-    <form onSubmit={handleSubmit}>
-      <h1>Přidat Eshop</h1>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <h1 className="text-2xl font-bold">Přidat Eshop</h1>
       {notification && <Notification type={notification.type} message={notification.message} />}
       {loading && <Loading isLoading={true} />}
       {apiKey && (
@@ -120,14 +108,70 @@ const AddEshopForm: React.FC = () => {
           <p>API klíč byl vygenerován a uložen. Nyní můžete přizpůsobit nastavení vašeho eshopu.</p>
         </div>
       )}
-      <TextInput label="Název eshopu" placeholder="Zadejte název eshopu" value={eshopName} onChange={setEshopName} required />
-      <UrlInput label="URL eshopu" placeholder="Zadejte URL eshopu" value={websiteUrl} onChange={setWebsiteUrl} required />
-      <MultiSelect label="Sektor zboží" options={sectorOptions} value={sectors} onChange={setSectors} required />
-      <CheckboxGroup label="Metody ověření" options={verificationMethodOptions} value={verificationMethods} onChange={setVerificationMethods} />
-      <RadioGroup label="Způsob integrace" options={integrationOptions} value={integration} onChange={setIntegration} required />
-      <RadioGroup label="Cenový plán" options={pricePlanOptions} value={pricePlan} onChange={setPricePlan} required />
-      <Checkbox label="Potvrzuji, že informace jsou správné" checked={confirmation} onChange={setConfirmation} />
-      <Button label={loading ? 'Odesílám...' : 'Přidat Eshop'} onClick={handleSubmit} disabled={loading} />
+      <TextInput
+        label="Název eshopu"
+        placeholder="Zadejte název eshopu"
+        {...register('eshopName', { required: 'Název eshopu je povinný' })}
+        error={!!errors.eshopName}
+        errorMessage={(errors.eshopName?.message) as string}
+      />
+
+      <UrlInput
+        label="URL eshopu"
+        placeholder="Zadejte URL eshopu"
+        {...register('websiteUrl', {
+          required: 'URL eshopu je povinná',
+          pattern: {
+            value: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
+            message: 'Neplatná URL adresa',
+          },
+        })}
+        error={!!errors.websiteUrl}
+        errorMessage={(errors.websiteUrl?.message) as string}
+      />
+
+      <MultiSelect
+        label="Sektor zboží"
+        options={sectorOptions}
+        {...register('sectors', { required: 'Vyberte alespoň jeden sektor' })}
+        // value a onChange už nepotřebujeme, řeší to React Hook Form
+        error={!!errors.sectors}
+        errorMessage={(errors.sectors?.message) as string}
+
+      />
+
+      <CheckboxGroup
+        label="Metody ověření"
+        options={verificationMethodOptions}
+        {...register('verificationMethods', { required: 'Vyberte alespoň jednu metodu ověření' })}
+        error={!!errors.verificationMethods}
+        errorMessage={(errors.verificationMethods?.message) as string}
+      />
+
+      <RadioGroup
+        label="Způsob integrace"
+        options={integrationOptions}
+        {...register('integration', { required: 'Vyberte způsob integrace' })}
+        error={!!errors.integration}
+        errorMessage={(errors.integration?.message) as string}
+      />
+
+      <RadioGroup
+        label="Cenový plán"
+        options={pricePlanOptions}
+        {...register('pricePlan', { required: 'Vyberte cenový plán' })}
+        error={!!errors.pricePlan}
+        errorMessage={(errors.pricePlan?.message) as string}
+      />
+
+      <Checkbox
+        label="Potvrzuji, že informace jsou správné"
+        {...register('confirmation', { required: 'Potvrďte správnost informací' })}
+        error={!!errors.confirmation}
+        errorMessage={(errors.confirmation?.message) as string}
+      />
+
+      <Button label={isSubmitting ? 'Odesílám...' : 'Přidat Eshop'}  disabled={isSubmitting} />
     </form>
   );
 };

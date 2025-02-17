@@ -9,7 +9,7 @@ export type Option = {
 export type CheckboxGroupProps = {
   label: string;
   options: Option[];
-  value: string[];
+  value?: string[]; // Změna: value je nyní nepovinné
   onChange: (values: string[]) => void;
   error?: boolean;
   errorMessage?: string;
@@ -18,7 +18,7 @@ export type CheckboxGroupProps = {
 const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   label,
   options,
-  value,
+  value = [], // Výchozí hodnota: prázdné pole
   onChange,
   error,
   errorMessage,
@@ -39,7 +39,7 @@ const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
           <label>
             <input
               type="checkbox"
-              checked={value.includes(option.value)}
+              checked={value?.includes(option.value) ?? false} // Ošetření undefined
               onChange={(e) => handleChange(option.value, e.target.checked)}
               style={{ marginRight: '0.5rem' }}
             />
