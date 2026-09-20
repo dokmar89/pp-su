@@ -1,43 +1,43 @@
-# PassProve — Supabase portal and verification prototype
+# PassProve — portál a ověřování se Supabase
 
-A Next.js portal variant combining customer workflows, registration administration and verification-function experiments.
+Varianta portálu v Next.js spojující zákaznické procesy, správu registrací a experimentální ověřovací funkce.
 
-**Status:** Legacy/parallel PassProve implementation retained for reference; not presented as the canonical production release.
+**Stav:** Starší nebo souběžná varianta PassProve uchovaná jako reference; nejde o označení hlavní produkční verze.
 
-## Scope
+## Co projekt obsahuje
 
-- Account, e-shop, customization and support screens.
-- Admin registration pages and API route source.
-- Supabase function source for verification methods, codes and invoices.
+- Účet, e-shopy, přizpůsobení a podpora.
+- Administrační stránky registrací a zdroj API.
+- Funkce Supabase pro ověřovací metody, kódy a faktury.
 
-## Technology
+## Technologie
 
 Next.js, React, TypeScript, Tailwind CSS, Supabase.
 
-## Architecture and source map
+## Architektura a struktura
 
-- `src/app/` — portal pages and API handlers
-- `src/components/` — customer and verification UI
-- `src/lib/` — Supabase and data hooks
-- `supabase/functions/` — function source
+- `src/app/` — stránky portálu a API
+- `src/components/` — zákaznické a ověřovací rozhraní
+- `src/lib/` — Supabase a datové pomocné funkce
+- `supabase/functions/` — zdrojové kódy funkcí
 
-## Local development
+## Lokální vývoj
 
-Requires Node.js and npm. From the repository root:
+Potřebujete Node.js a npm. V kořenové složce repozitáře spusťte:
 
 ```sh
 npm install
 npm run dev
 ```
 
-Build command declared by this checkout: `npm run build`.
+Příkaz pro sestavení uvedený v projektu: `npm run build`.
 
-These are the repository scripts, not a claim of a passing build. Dependency installation, build and live integrations were not executed during the documentation review.
+Jde o příkazy deklarované v repozitáři, nikoli o potvrzení úspěšného sestavení. Instalace závislostí, sestavení ani napojení na živé služby nebyly při úpravě dokumentace spuštěny.
 
-## Configuration and limitations
+## Konfigurace a omezení
 
-Use separate development services and validate Supabase policies and provider callbacks. Configuration files include `.env.example` and a legacy environment file under `src/lib`; do not reuse committed credentials. Some API/function paths represent unfinished integration work.
+Použijte oddělené vývojové služby a ověřte databázové politiky i callbacky poskytovatelů. Vedle `.env.example` je přítomný starší soubor prostředí v `src/lib`; nepřebírejte commitnuté přihlašovací údaje. Některá rozhraní představují nedokončenou integrační práci.
 
-## Documentation next steps
+## Co doplnit do dokumentace
 
-Capture screenshots using synthetic data, document a reproducible test run, and record which integrations have been verified. Keep credentials and deployment-specific configuration outside version control.
+Snímky obrazovky s fiktivními daty, opakovatelný postup ověření a přehled skutečně otestovaných integrací. Přihlašovací údaje a konfigurace konkrétního nasazení patří mimo Git.
